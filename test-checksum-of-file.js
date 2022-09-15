@@ -1,8 +1,6 @@
-// Based on Glacier's example: http://docs.aws.amazon.com/AWSJavaScriptSDK/guide/examples.html#Amazon_Glacier__Multi-part_Upload
+var crypto = require('crypto');
 var fs = require('fs');
-var sha256File = require('sha256-file');
 var AWS = require('aws-sdk');
-// AWS.config.loadFromPath('./aws-config.json');
 var s3 = new AWS.S3();
 
 // File
@@ -22,7 +20,7 @@ var maxUploadTries = 3;
 var multiPartParams = {
     Bucket: bucket,
     Key: fileKey,
-    ContentType: 'application/pdf'
+    ContentType: 'application/pdf',
 };
 var multipartMap = {
     Parts: []
@@ -60,19 +58,26 @@ function uploadPart(s3, multipart, partParams, tryNum) {
     };
     console.log("Completed part", this.request.params.PartNumber);
     console.log('mData', mData);
-    if (--numPartsLeft > 0) return; // complete only when all parts uploaded
+    if (--numPartsLeft > 0) return;
 
     var doneParams = {
       Bucket: bucket,
       Key: fileKey,
       MultipartUpload: multipartMap,
       UploadId: multipart.UploadId,
-      ChecksumSHA256: "GyCYq7yDhTg3f/wnku2xIw3SAblUG6VkFpl2Dhb2rXY="
+      ChecksumSHA256: getChecksumForFile(filePath) // TEST: Replace here with a randomn string to test incorrect checksum of file
     };
 
     console.log("Completing upload...");
     completeMultipartUpload(s3, doneParams);
   });
+}
+
+function getChecksumForFile(filename) {
+    var sum = crypto.createHash('sha256');
+    fs.createReadStream(filename);
+    sum.update(fs.readFileSync(filename));
+    return sum.digest('base64');
 }
 
 // Multipart
@@ -91,7 +96,7 @@ s3.createMultipartUpload(multiPartParams, function(mpErr, multipart){
         Bucket: bucket,
         Key: fileKey,
         PartNumber: String(partNum),
-        UploadId: multipart.UploadId,
+        UploadId: multipart.UploadId
     };
 
     // Send a single part
