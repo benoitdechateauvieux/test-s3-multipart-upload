@@ -4,8 +4,8 @@ var AWS = require('aws-sdk');
 var s3 = new AWS.S3();
 
 // File
-var fileName = "test.pptx";
-var filePath = '/Users/chateauv/Downloads/' + fileName;
+var fileName = "file_example_MP4_1280_10MG.mp4";
+var filePath = './' + fileName;
 var fileKey = fileName;
 var buffer = fs.readFileSync(filePath);
 // S3 Upload options
