@@ -21,14 +21,12 @@ var multipartMap = {
 };
 
 function completeMultipartUpload(s3, doneParams) {
-  // s3.completeMultipartUpload(doneParams, function(err, data) {
   const command = new CompleteMultipartUploadCommand(doneParams);
   const response = s3.send(command);
   response.then((output) => {
     var delta = (new Date() - startTime) / 1000;
     console.log('Completed upload in', delta, 'seconds');
     console.log('Final upload data:', output);
-    // }
   }).catch((error) => {
     console.log("An error occurred while completing the multipart upload");
     console.log(error);
